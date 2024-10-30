@@ -1,0 +1,70 @@
+/* style.css */
+
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-repeat:  no-repeat;
+  }
+
+  body {
+    background-color:rgba(201, 184, 107, 0.617); /* Off-white background */
+    background-image: url('Bear\ 1.png'); /* Replace with your image path */
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+  
+  .container {
+    text-align: center;
+    padding: 20px;
+    background-color: #6e4101f5;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  h1 {
+    font-size: 24px;
+    margin-bottom:   
+   20px;
+   color:rgba(255, 255, 255, 0.927);
+    font-weight: bold;
+    text-align: left;
+    font-style:italic;
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  }
+  
+  input[type="text"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 300px;
+  }
+  
+  button {
+    padding: 10px 20px;
+    background-color:   
+   #ccc;
+    color: #333;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  #results {
+    margin-top: 20px;
+  }
+  
+  .result {
+    border-bottom: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .result:last-child {
+    border-bottom: none;
+  }
