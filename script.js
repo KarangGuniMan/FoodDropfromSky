@@ -1,51 +1,75 @@
-const searchButton = document.getElementById('search-button');
-const locationInput = document.getElementById('location-input');
-const resultsDiv = document.getElementById('results');
+// 1. Get user location using the browser's Geolocation API
+async function getUserLocation() {
+  try {
+    // Request the user's location using the Geolocation API
+    const position = await new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject);
+    });
 
-searchButton.addEventListener('click', () => {
-  const location = locationInput.value;
+    // Extract the latitude and longitude coordinates from the response
+    const { latitude, longitude } = position.coords;
+    return { latitude, longitude };
+  } catch (error) {
+    // Handle errors, such as user denying location access
+    console.error('Error getting user location:', error);
+    throw error;
+  }
+}
 
-  // Check if the input is a Singapore postal code
-  if (/^\d{6}$/.test(location)) {
-    // Use geocoding API to convert postal code to lat/lng
-    const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${location}&key=AIzaSyA3pTkee0v777-QpuN1Qs_RiX2wezm9HTk`;
+// 2. Use the Google Maps API to find nearby restaurants
+async function findNearbyRestaurants(latitude, longitude) {
+  try {
+    // Create a new Google Maps client
+    const client = new google.maps.places.PlacesService(document.createElement('div'));
 
-    fetch(geocodingUrl)
-      .then(response => response.json())
-      .then(data => {
-        const lat = data.results[0].geometry.location.lat;
-        const lng = data.results[0].geometry.location.lng;
+    // Search for nearby restaurants using the Places API
+    const response = await client.nearbySearch({
+      location: { lat: latitude, lng: longitude },
+      radius: 5000, // Search radius in meters
+      type: 'restaurant',
+      rankBy: google.maps.places.RankBy.RATING, // Sort by rating
+    });
 
-        // Use Places API to fetch restaurants
-        const placesUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=AIzaSyA3pTkee0v777-QpuN1Qs_RiX2wezm9HTk&location=${lat},${lng}&radius=5000&type=restaurant`;
+    // Extract the restaurant information from the response
+    const restaurants = response.map(place => ({
+      name: place.name,
+      rating: place.rating,
+      address: place.vicinity,
+    }));
 
-        fetch(placesUrl)
-          .then(response => response.json())
-          .then(data => {
-            resultsDiv.innerHTML = ''; // Clear previous results
+    return restaurants;
+  } catch (error) {
+    // Handle errors, such as API quota exceeded
+    console.error('Error finding nearby restaurants:', error);
+    throw error;
+  }
+}
 
-            data.results.forEach(result => {
-              const restaurant = document.createElement('div');
-              restaurant.classList.add('result');
-              restaurant.innerHTML = `
-                <h2>${result.name}</h2>
-                <p>${result.vicinity}</p>
-                <p>Rating: ${result.rating}</p>
-              `;
-              resultsDiv.appendChild(restaurant);
-            });
-          })
-          .catch(error => {
-            console.error('Error fetching restaurants:', error);
-            resultsDiv.innerHTML = '<p>Error fetching restaurants. Please try again later.</p>';
-          });
-      })
-      .catch(error => {
-        console.error('Error fetching geocoding data:', error);
-        resultsDiv.innerHTML = '<p>Error fetching location. Please try again later.</p>';
-      });
-  } else {
-    // Handle regular location input (e.g., city name)
-    // ... (existing code for fetching restaurants by location name)
+// 3. Randomly select and display a restaurant recommendation
+function displayRestaurantRecommendation(restaurants) {
+  // Randomly select a restaurant from the list
+  const randomIndex = Math.floor(Math.random() * restaurants.length);
+  const selectedRestaurant = restaurants[randomIndex];
+
+  // Get the recommendation element and update its content
+  const recommendationElement = document.getElementById('restaurant-recommendation');
+  recommendationElement.textContent = `We recommend: ${selectedRestaurant.name} (Rating: ${selectedRestaurant.rating}, Address: ${selectedRestaurant.address})`;
+}
+
+// 4. Implement the one-button functionality
+document.getElementById('find-restaurant-button').addEventListener('click', async () => {
+  try {
+    // Get the user's location
+    const { latitude, longitude } = await getUserLocation();
+
+    // Find nearby restaurants
+    const restaurants = await findNearbyRestaurants(latitude, longitude);
+
+    // Display a random restaurant recommendation
+    displayRestaurantRecommendation(restaurants);
+  } catch (error) {
+    // Handle errors and display appropriate feedback to the user
+    console.error('Error:', error);
+    alert('Sorry, we couldn\'t find any nearby restaurant recommendations. Please try again later.');
   }
 });
